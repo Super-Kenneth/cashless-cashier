@@ -5,6 +5,9 @@ import moment from "moment";
 export default function HomePage() {
   const [amount, setAmount] = useState("");
   const [entries, setEntries] = useState([]);
+  const [nfcId, setNfcId] = useState("");
+  const [nfcError, setNfcError] = useState("");
+  
   const date = moment().utcOffset("+08:00").format("ddd, MMMM DD YYYY");
   const time = moment().format("LT");
 
@@ -23,7 +26,49 @@ export default function HomePage() {
     }
   };
 
+  const clearTotal = () => {
+    setEntries([]);
+  };
+
   const total = entries.reduce((acc, curr) => acc + curr, 0);
+
+  const user = [
+    {
+      id: 1,
+      fname: "Kenneth",
+      lname: "Manuel",
+      lnmae: "C.",
+      grade: "11",
+      strand: "humss",
+      section: "mactan",
+      nfc_id: "12345",
+      current_balance: "500",
+    },
+    {
+      id: 2,
+      fname: "Paula Marie",
+      lname: "Mendoza",
+      lnmae: "B.",
+      grade: "12",
+      strand: "stem",
+      section: "luna",
+      nfc_id: "54321",
+      current_balance: "800",
+    },
+  ];
+
+  const handleNfcIdChange = (e) => {
+    const enteredNfcId = e.target.value;
+    setNfcId(enteredNfcId);
+
+    const userExists = user.some((user) => user.nfc_id === enteredNfcId);
+
+    if (enteredNfcId && !userExists) {
+      setNfcError("Invalid NFC ID");
+    } else {
+      setNfcError("");
+    }
+  };
 
   return (
     <React.Fragment>
@@ -31,8 +76,8 @@ export default function HomePage() {
         <title>CMI Canteen</title>
       </Head>
       <main className="flex flex-row gap-x-4 w-screen h-screen bg-[#E4EFFF] p-4">
-        <div className="w-[70%] bg-white rounded-xl h-full p-4">
-          <div className="mb-4">
+        <div className="w-[70%] bg-white rounded-xl h-full p-4 overflow-y-scroll">
+          <div className="mb-4 w-full">
             <h2 className="text-2xl font-semibold text-[#002147]">
               Amount List
             </h2>
@@ -46,25 +91,48 @@ export default function HomePage() {
             <div className="mt-4 text-xl font-semibold text-[#002147]">
               <p>Total: ₱ {total}</p>
             </div>
+
+            {total > 0 && (
+              <div className="w-full mt-4">
+                <button
+                  onClick={clearTotal}
+                  className=" bg-[#f00] p-4 rounded-xl text-white"
+                >
+                  Clear Total
+                </button>
+                <div className="w-full mt-4 text-center">
+                  <input
+                    type="text"
+                    value={nfcId}
+                    onChange={handleNfcIdChange}
+                    placeholder="Tap NFC ID"
+                    className="w-full h-16 border border-[#002147] rounded-xl p-4 outline-none text-center"
+                  />
+                  {nfcError && (
+                    <p className=" text-[#f00] mt-2">{nfcError}</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="w-[30%] h-full flex flex-col gap-y-4">
-          <div className="w-full h-[30%] bg-white rounded-xl text-center flex flex-col gap-y-2 justify-center items-center">
-            <p className="font-semibold text-3xl text-[#002147]">{date}</p>
-            <p className="font-semibold text-2xl text-[#002147]">{time}</p>
+          <div className="w-full h-[20%] bg-white rounded-xl text-center flex flex-col gap-y-2 justify-center items-center">
+            <p className="font-semibold text-2xl text-[#002147]">{date}</p>
+            <p className="font-semibold text-xl text-[#002147]">{time}</p>
           </div>
 
-          <div className="w-full h-[70%] bg-white rounded-xl p-4 pt-10">
+          <div className="w-full h-[80%] bg-white rounded-xl p-4 pt-10">
             <h1 className="text-lg mb-4">Enter Amount: </h1>
             <div className="w-full">
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={handleInputChange}
-                  className="p-4 w-full border border-[#002147] rounded-lg outline-none"
-                  placeholder="Enter a custom amount"
-                />
+              <input
+                type="number"
+                value={amount}
+                onChange={handleInputChange}
+                className="p-4 w-full border border-[#002147] rounded-lg outline-none"
+                placeholder="Enter a custom amount"
+              />
             </div>
 
             <div className="w-full grid grid-cols-2 mt-4 gap-4">
