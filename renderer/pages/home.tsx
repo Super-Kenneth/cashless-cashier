@@ -7,9 +7,37 @@ export default function HomePage() {
   const [entries, setEntries] = useState([]);
   const [nfcId, setNfcId] = useState("");
   const [nfcError, setNfcError] = useState("");
-  
+  const [showModal, setShowModal] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [modalMessage, setModalMessage] = useState("");
+
   const date = moment().utcOffset("+08:00").format("ddd, MMMM DD YYYY");
   const time = moment().format("LT");
+
+  const user = [
+    {
+      id: 1,
+      fname: "Kenneth",
+      lname: "manuel",
+      mname: "C.",
+      grade: "11",
+      strand: "humss",
+      section: "mactan",
+      nfc_id: "12345",
+      current_balance: 500,
+    },
+    {
+      id: 2,
+      fname: "Paula Marie",
+      lname: "Mendoza",
+      mname: "B.",
+      grade: "12",
+      strand: "stem",
+      section: "luna",
+      nfc_id: "54321",
+      current_balance: 800,
+    },
+  ];
 
   const handleButtonClick = (value) => {
     setEntries((prevEntries) => [...prevEntries, value]);
@@ -32,42 +60,36 @@ export default function HomePage() {
 
   const total = entries.reduce((acc, curr) => acc + curr, 0);
 
-  const user = [
-    {
-      id: 1,
-      fname: "Kenneth",
-      lname: "Manuel",
-      lnmae: "C.",
-      grade: "11",
-      strand: "humss",
-      section: "mactan",
-      nfc_id: "12345",
-      current_balance: "500",
-    },
-    {
-      id: 2,
-      fname: "Paula Marie",
-      lname: "Mendoza",
-      lnmae: "B.",
-      grade: "12",
-      strand: "stem",
-      section: "luna",
-      nfc_id: "54321",
-      current_balance: "800",
-    },
-  ];
-
   const handleNfcIdChange = (e) => {
     const enteredNfcId = e.target.value;
     setNfcId(enteredNfcId);
 
-    const userExists = user.some((user) => user.nfc_id === enteredNfcId);
+    const foundUser = user.find((user) => user.nfc_id === enteredNfcId);
 
-    if (enteredNfcId && !userExists) {
+    if (enteredNfcId && !foundUser) {
       setNfcError("Invalid NFC ID");
-    } else {
+      setShowModal(false);
+    } else if (foundUser) {
       setNfcError("");
+      setUserInfo(foundUser);
+
+    
+      if (foundUser.current_balance < total) {
+        setModalMessage("The balance is not enough.");
+      } else {
+        setModalMessage("");
+      }
+
+      setShowModal(true);
+    } else {
+      setUserInfo(null);
+      setShowModal(false);
     }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setNfcId("");
   };
 
   return (
@@ -108,9 +130,7 @@ export default function HomePage() {
                     placeholder="Tap NFC ID"
                     className="w-full h-16 border border-[#002147] rounded-xl p-4 outline-none text-center"
                   />
-                  {nfcError && (
-                    <p className=" text-[#f00] mt-2">{nfcError}</p>
-                  )}
+                  {nfcError && <p className=" text-[#f00] mt-2">{nfcError}</p>}
                 </div>
               </div>
             )}
@@ -182,6 +202,51 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {showModal && (
+        <div className=" w-screen h-screen fixed inset-0 flex items-center justify-center bg-[#000] bg-opacity-50">
+          <div className="bg-white p-6 rounded-xl w-[70%] h-[70%]">
+            {modalMessage ? (
+              <div className="w-full h-[80%] flex justify-center items-center">
+                <p className="mt-4 text-3xl text-[#f00]">{modalMessage}</p>
+              </div>
+            ) : (
+              <div className=" w-full h-[80%] flex flex-col justify-center items-center text-[#002147]">
+                <p className=" text-3xl font-semibold capitalize ">
+                  {userInfo.lname}, {userInfo.fname} {userInfo.mname}
+                </p>
+                <p className=" text-2xl capitalize font-semibold">
+                  {userInfo.strand} {userInfo.grade} - {userInfo.section}
+                </p>
+                <p className=" text-lg opacity-50">
+                  ({date}) Your Current Balance is:{" "}
+                  <span className=" font-bold text-2xl">
+                    {userInfo.current_balance}
+                  </span>
+                </p>
+
+                <p className=" mt-6 text-3xl font-extrabold">
+                  Amount to pay: {total}
+                </p>
+              </div>
+            )}
+            <div className=" w-full h-[20%] flex flex-col items-center gap-y-2">
+            <button
+                onClick={closeModal}
+                className=" w-[60%] h-[50%] bg-[#002147] p-4 rounded-xl text-white"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={closeModal}
+                className=" w-[60%] h-[50%] bg-[#f00] p-4 rounded-xl text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </React.Fragment>
   );
 }
