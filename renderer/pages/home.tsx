@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import moment from "moment";
 
 export default function HomePage() {
   const [amount, setAmount] = useState("");
@@ -10,9 +9,6 @@ export default function HomePage() {
   const [showModal, setShowModal] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [modalMessage, setModalMessage] = useState("");
-
-  const date = moment().utcOffset("+08:00").format("ddd, MMMM DD YYYY");
-  const time = moment().format("LT");
 
   const user = [
     {
@@ -73,9 +69,8 @@ export default function HomePage() {
       setNfcError("");
       setUserInfo(foundUser);
 
-    
       if (foundUser.current_balance < total) {
-        setModalMessage("The balance is not enough.");
+        setModalMessage("Insufficient Balance");
       } else {
         setModalMessage("");
       }
@@ -92,6 +87,13 @@ export default function HomePage() {
     setNfcId("");
   };
 
+  const currentDate = new Date();
+  const date = currentDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
   return (
     <React.Fragment>
       <Head>
@@ -99,7 +101,7 @@ export default function HomePage() {
       </Head>
       <main className="flex flex-row gap-x-4 w-screen h-screen bg-[#E4EFFF] p-4">
         <div className="w-[70%] bg-white rounded-xl h-full p-4 overflow-y-scroll">
-          <div className="mb-4 w-full">
+          <div className="mb-4 w-full h-[50%] overflow-y-scroll">
             <h2 className="text-2xl font-semibold text-[#002147]">
               Amount List
             </h2>
@@ -113,37 +115,25 @@ export default function HomePage() {
             <div className="mt-4 text-xl font-semibold text-[#002147]">
               <p>Total: ₱ {total}</p>
             </div>
-
-            {total > 0 && (
-              <div className="w-full mt-4">
-                <button
-                  onClick={clearTotal}
-                  className=" bg-[#f00] p-4 rounded-xl text-white"
-                >
-                  Clear Total
-                </button>
+          </div>
+          {total > 0 && (
+              <div className="w-full h-[50%] mt-4">
                 <div className="w-full mt-4 text-center">
                   <input
                     type="text"
                     value={nfcId}
                     onChange={handleNfcIdChange}
                     placeholder="Tap NFC ID"
-                    className="w-full h-16 border border-[#002147] rounded-xl p-4 outline-none text-center"
+                    className="w-full h-24 border border-[#002147] rounded-xl p-4 outline-none text-center"
                   />
                   {nfcError && <p className=" text-[#f00] mt-2">{nfcError}</p>}
                 </div>
               </div>
             )}
-          </div>
         </div>
 
         <div className="w-[30%] h-full flex flex-col gap-y-4">
-          <div className="w-full h-[20%] bg-white rounded-xl text-center flex flex-col gap-y-2 justify-center items-center">
-            <p className="font-semibold text-2xl text-[#002147]">{date}</p>
-            <p className="font-semibold text-xl text-[#002147]">{time}</p>
-          </div>
-
-          <div className="w-full h-[80%] bg-white rounded-xl p-4 pt-10">
+          <div className="w-full h-full bg-white rounded-xl p-4 pt-10">
             <h1 className="text-lg mb-4">Enter Amount: </h1>
             <div className="w-full">
               <input
@@ -155,7 +145,7 @@ export default function HomePage() {
               />
             </div>
 
-            <div className="w-full grid grid-cols-2 mt-4 gap-4">
+            <div className="w-full grid grid-cols-2 mt-4 gap-2">
               <button
                 onClick={() => handleButtonClick(20)}
                 className="rounded-xl bg-[#002147] p-4 text-white"
@@ -199,6 +189,12 @@ export default function HomePage() {
             >
               Add Amount
             </button>
+            <button
+              onClick={clearTotal}
+              className=" mt-2 bg-[#f00] w-full p-4 rounded-xl text-white"
+            >
+              Clear Total
+            </button>
           </div>
         </div>
       </main>
@@ -207,43 +203,58 @@ export default function HomePage() {
         <div className=" w-screen h-screen fixed inset-0 flex items-center justify-center bg-[#000] bg-opacity-50">
           <div className="bg-white p-6 rounded-xl w-[70%] h-[70%]">
             {modalMessage ? (
-              <div className="w-full h-[80%] flex justify-center items-center">
-                <p className="mt-4 text-3xl text-[#f00]">{modalMessage}</p>
+              <div className=" w-full h-full">
+                <div className="w-full flex justify-end">
+                  <button onClick={closeModal} className=" text-3xl">
+                    X
+                  </button>
+                </div>
+                <div className="w-full h-[80%] flex flex-col justify-center items-center">
+                  <p className="mt-4 text-3xl text-[#f00]">{modalMessage}</p>
+                  <p className=" text-gray-400">
+                    You're Current Balance is:{" "}
+                    <span className=" font-bold">
+                      ₱ {userInfo.current_balance}
+                    </span>
+                  </p>
+                </div>
               </div>
             ) : (
-              <div className=" w-full h-[80%] flex flex-col justify-center items-center text-[#002147]">
-                <p className=" text-3xl font-semibold capitalize ">
-                  {userInfo.lname}, {userInfo.fname} {userInfo.mname}
-                </p>
-                <p className=" text-2xl capitalize font-semibold">
-                  {userInfo.strand} {userInfo.grade} - {userInfo.section}
-                </p>
-                <p className=" text-lg opacity-50">
-                  ({date}) Your Current Balance is:{" "}
-                  <span className=" font-bold text-2xl">
-                    {userInfo.current_balance}
-                  </span>
-                </p>
+              <div className=" w-full h-full">
+                <div className=" w-full h-[80%] flex flex-col justify-center items-center text-[#002147]">
+                  <p className=" text-3xl font-semibold capitalize ">
+                    {userInfo.lname}, {userInfo.fname} {userInfo.mname}
+                  </p>
+                  <p className=" text-2xl capitalize font-semibold">
+                    {userInfo.strand} {userInfo.grade} - {userInfo.section}
+                  </p>
+                  <p className=" text-lg opacity-50">
+                    ({date}) Your Current Balance is:{" "}
+                    <span className=" font-bold text-2xl">
+                      ₱ {userInfo.current_balance}
+                    </span>
+                  </p>
 
-                <p className=" mt-6 text-3xl font-extrabold">
-                  Amount to pay: {total}
-                </p>
+                  <p className=" mt-6 text-3xl font-extrabold">
+                    Amount to pay: {total}
+                  </p>
+                </div>
+                <div className=" w-full h-[20%] flex flex-col items-center gap-y-2">
+                  <button
+                    onClick={closeModal}
+                    className=" w-[60%] h-[50%] bg-[#002147] p-4 rounded-xl text-white"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={closeModal}
+                    className=" w-[60%] h-[50%] p-4 rounded-xl"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             )}
-            <div className=" w-full h-[20%] flex flex-col items-center gap-y-2">
-            <button
-                onClick={closeModal}
-                className=" w-[60%] h-[50%] bg-[#002147] p-4 rounded-xl text-white"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={closeModal}
-                className=" w-[60%] h-[50%] bg-[#f00] p-4 rounded-xl text-white"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
         </div>
       )}
