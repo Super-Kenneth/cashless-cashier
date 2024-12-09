@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function HomePage() {
   const [amount, setAmount] = useState("");
@@ -9,6 +11,10 @@ export default function HomePage() {
   const [showModal, setShowModal] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [modalMessage, setModalMessage] = useState("");
+
+  console.log("HI FROM CASHIER FOLDER");
+
+  const router = useRouter();
 
   const user = [
     {
@@ -117,19 +123,19 @@ export default function HomePage() {
             </div>
           </div>
           {total > 0 && (
-              <div className="w-full h-[50%] mt-4">
-                <div className="w-full mt-4 text-center">
-                  <input
-                    type="text"
-                    value={nfcId}
-                    onChange={handleNfcIdChange}
-                    placeholder="Tap NFC ID"
-                    className="w-full h-24 border border-[#002147] rounded-xl p-4 outline-none text-center"
-                  />
-                  {nfcError && <p className=" text-[#f00] mt-2">{nfcError}</p>}
-                </div>
+            <div className="w-full h-[50%] mt-4">
+              <div className="w-full mt-4 text-center">
+                <input
+                  type="text"
+                  value={nfcId}
+                  onChange={handleNfcIdChange}
+                  placeholder="Tap NFC ID"
+                  className="w-full h-24 border border-[#002147] rounded-xl p-4 outline-none text-center"
+                />
+                {nfcError && <p className=" text-[#f00] mt-2">{nfcError}</p>}
               </div>
-            )}
+            </div>
+          )}
         </div>
 
         <div className="w-[30%] h-full flex flex-col gap-y-4">
@@ -191,10 +197,24 @@ export default function HomePage() {
             </button>
             <button
               onClick={clearTotal}
-              className=" mt-2 bg-[#f00] w-full p-4 rounded-xl text-white"
+              className=" mt-2 bg-blue-500 w-full p-4 rounded-xl text-white"
             >
               Clear Total
             </button>
+
+            <button
+              onClick={() => router.push("./login")}
+              className=" mt-2 bg-[#f00] w-full p-4 rounded-xl text-white"
+            >
+              Log Out
+            </button>
+
+            {/* <Link
+              className="mt-2 bg-red-400 min-w-full p-4 rounded-xl text-white"
+              href="./login"
+            >
+              Log Out
+            </Link> */}
           </div>
         </div>
       </main>
