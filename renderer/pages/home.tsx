@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 
 export default function HomePage() {
@@ -12,6 +11,7 @@ export default function HomePage() {
   const [userInfo, setUserInfo] = useState(null);
   const [modalMessage, setModalMessage] = useState("");
   const [nfcModal, setnfcModal] = useState(false);
+  const [productModal, setProductModal] = useState(false);
 
   const nfcInputRef = useRef(null);
 
@@ -42,6 +42,16 @@ export default function HomePage() {
     },
   ];
 
+  const product = [
+    { product: "Ulam w/ rice", price: 60 },
+    { product: "Rice", price: 15 },
+    { product: "Ulam", price: 50 },
+    { product: "Water (small)", price: 15 },
+    { product: "Water (big)", price: 25 },
+    { product: "Softdrinks mismo", price: 25 },
+    { product: "shabu", price: 150 },
+  ];
+
   useEffect(() => {
     if (nfcModal && nfcInputRef.current) {
       nfcInputRef.current.focus();
@@ -54,7 +64,10 @@ export default function HomePage() {
 
   const handleInputSubmit = () => {
     if (amount) {
-      setEntries((prevEntries) => [...prevEntries, Number(amount)]);
+      setEntries((prevEntries) => [
+        ...prevEntries,
+        { type: "Amount", value: Number(amount) },
+      ]);
       setAmount("");
     }
   };
@@ -63,8 +76,26 @@ export default function HomePage() {
     setEntries([]);
   };
 
-  const total = entries.reduce((acc, curr) => acc + curr, 0);
-  const handleAmountChange = (value) => setEntries((prev) => [...prev, value]);
+  const total = entries.reduce((acc, entry) => {
+    if (entry.type === "Amount") {
+      return acc + entry.value;
+    } else if (entry.type === "Product") {
+      return acc + entry.price;
+    }
+    return acc;
+  }, 0);
+
+  const handleAmountChange = (value) => {
+    setEntries((prev) => [...prev, { type: "Amount", value }]);
+  };
+
+  const handleProductSelect = (product) => {
+    setEntries((prevEntries) => [
+      ...prevEntries,
+      { type: "Product", product: product.product, price: product.price },
+    ]);
+  };
+
   const handleNfcIdChange = (e) => {
     const enteredNfcId = e.target.value;
     setNfcId(enteredNfcId);
@@ -112,12 +143,18 @@ export default function HomePage() {
         <div className="w-[70%] bg-white rounded-xl h-full p-4">
           <div className=" h-[90%]  w-full">
             <h2 className="text-2xl font-semibold text-[#002147]">
-              Amount List
+              Order List
             </h2>
             <ul className="mt-4 space-y-2">
               {entries.map((entry, index) => (
                 <li key={index} className="text-lg text-[#002147]">
-                  Others: {entry}
+                  {entry.type === "Amount" ? (
+                    <>Others: ₱ {entry.value}</>
+                  ) : (
+                    <>
+                      {entry.product}: ₱ {entry.price}
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
@@ -129,13 +166,13 @@ export default function HomePage() {
             <div className=" h-[10%] flex flex-row w-full gap-x-4">
               <button
                 onClick={() => setnfcModal(true)}
-                className=" bg-[#002147] w-[80%] p-4 text-white rounded-xl"
+                className=" bg-[#002147] w-[80%] p-3 text-white rounded-xl flex justify-center items-center"
               >
                 Pay Now
               </button>
               <button
                 onClick={clearTotal}
-                className=" bg-[#f00] w-[20%] p-4 rounded-xl text-white"
+                className=" bg-[#f00] w-[20%] p-3 rounded-xl text-white flex justify-center items-center"
               >
                 Clear Total
               </button>
@@ -151,53 +188,85 @@ export default function HomePage() {
                   value={nfcId}
                   onChange={handleNfcIdChange}
                   placeholder="Tap NFC ID"
-                  className=" w-[80%] h-24 border rounded-xl p-4 outline-none text-center"
+                  className=" w-[80%] h-24 border rounded-xl p-3 outline-none text-center"
                 />
                 {nfcError && <p className=" text-[#f00] mt-2">{nfcError}</p>}
-
-                <button onClick={()=> setnfcModal(false)} className=" text-white absolute top-4 right-6 text-4xl">X</button>
+                <button
+                  onClick={() => setnfcModal(false)}
+                  className=" text-white absolute top-4 right-6 text-4xl"
+                >
+                  X
+                </button>
               </div>
             </div>
           )}
         </div>
 
         <div className="w-[30%] h-full flex flex-col gap-y-4 bg-white rounded-xl p-4">
-          <div className="w-full h-full bg-white rounded-xl p-4 pt-10">
+          <div className="w-full h-full bg-white rounded-xl">
             <h1 className="text-lg mb-4">Enter Amount: </h1>
             <div className="w-full">
               <input
                 type="number"
                 value={amount}
                 onChange={handleInputChange}
-                className="p-4 w-full border border-[#002147] rounded-lg outline-none"
+                className="p-3 w-full border border-[#002147] rounded-lg outline-none"
                 placeholder="Enter a custom amount"
               />
             </div>
-
+            <button
+              onClick={handleInputSubmit}
+              className="w-full mt-4 bg-[#002147] p-3 rounded-xl text-white"
+            >
+              Add Amount
+            </button>
             <div className="grid grid-cols-2 mt-4 gap-2">
               {[20, 50, 100, 200, 500, 1000].map((value) => (
                 <button
                   key={value}
                   onClick={() => handleAmountChange(value)}
-                  className="rounded-xl bg-[#002147] p-4 text-white"
+                  className="rounded-xl bg-[#002147] p-3 text-white"
                 >
-                  {value}
+                  ₱{value}
                 </button>
               ))}
             </div>
-            <button
-              onClick={handleInputSubmit}
-              className="w-full mt-4 bg-[#002147] p-4 rounded-xl text-white"
-            >
-              Add Amount
-            </button>
 
             <button
-              onClick={() => router.push("./login")}
-              className=" mt-2 bg-[#f00] w-full p-4 rounded-xl text-white"
+              onClick={() => setProductModal(true)}
+              className="bg-[#002147] w-full p-4 text-white rounded-xl mt-4"
             >
-              Log Out
+              Products
             </button>
+
+            {productModal && (
+              <div className=" w-screen h-screen fixed inset-0 flex flex-col items-center justify-center bg-[#000] bg-opacity-50">
+                <div className=" bg-white p-6 rounded-xl w-[80%] h-[80%]">
+                  <div className=" overflow-y-scroll h-[90%] py-2">
+                    <div className=" grid grid-cols-3 gap-4">
+                      {product.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleProductSelect(item)}
+                          className=" flex flex-col justify-center items-center bg-[#002147] h-20 text-center rounded-xl text-white"
+                        >
+                          {item.product}
+                          <span className=" text-sm">₱ {item.price}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className=" h-[10%] w-full flex justify-end">
+                    <button
+                      onClick={() => setProductModal(false)}
+                      className=" bg-[#002147] rounded-xl text-white h-full w-[20%]"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -239,7 +308,7 @@ export default function HomePage() {
                   </p>
 
                   <p className=" mt-6 text-3xl font-extrabold">
-                    Amount to pay: {total}
+                    Amount to pay: ₱{total}
                   </p>
                 </div>
                 <div className=" w-full h-[20%] flex flex-col items-center gap-y-2">
