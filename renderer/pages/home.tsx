@@ -12,6 +12,7 @@ export default function HomePage() {
   const [modalMessage, setModalMessage] = useState("");
   const [nfcModal, setnfcModal] = useState(false);
   const [productModal, setProductModal] = useState(false);
+  const [isStudentIdMode, setIsStudentIdMode] = useState(false);
 
   const nfcInputRef = useRef(null);
 
@@ -27,6 +28,7 @@ export default function HomePage() {
       strand: "humss",
       section: "mactan",
       nfc_id: "12345",
+      student_id: "S12345",
       current_balance: 500,
     },
     {
@@ -38,6 +40,7 @@ export default function HomePage() {
       strand: "stem",
       section: "luna",
       nfc_id: "54321",
+      student_id: "S54321",
       current_balance: 800,
     },
   ];
@@ -97,13 +100,17 @@ export default function HomePage() {
   };
 
   const handleNfcIdChange = (e) => {
-    const enteredNfcId = e.target.value;
-    setNfcId(enteredNfcId);
+    const enteredId = e.target.value;
+    setNfcId(enteredId);
 
-    const foundUser = user.find((user) => user.nfc_id === enteredNfcId);
+    const foundUser = user.find(
+      (user) =>
+        (isStudentIdMode && user.student_id === enteredId) ||
+        (!isStudentIdMode && user.nfc_id === enteredId)
+    );
 
-    if (enteredNfcId && !foundUser) {
-      setNfcError("Invalid NFC ID");
+    if (enteredId && !foundUser) {
+      setNfcError(isStudentIdMode ? "Invalid Student ID" : "Invalid NFC ID");
       setShowModal(false);
     } else if (foundUser) {
       setNfcError("");
@@ -120,6 +127,13 @@ export default function HomePage() {
       setUserInfo(null);
       setShowModal(false);
     }
+  };
+
+  const handleModeSwitch = () => {
+    setIsStudentIdMode((prevMode) => {
+      setNfcId("");
+      return !prevMode;
+    });
   };
 
   const closeModal = () => {
@@ -141,7 +155,7 @@ export default function HomePage() {
       </Head>
       <main className="flex flex-row gap-x-4 w-screen h-screen bg-[#E4EFFF] p-4">
         <div className="w-[70%] bg-white rounded-xl h-full p-4">
-          <div className=" h-[90%]  w-full">
+          <div className=" h-[90%] w-full">
             <h2 className="text-2xl font-semibold text-[#002147]">
               Order List
             </h2>
@@ -187,9 +201,19 @@ export default function HomePage() {
                   type="text"
                   value={nfcId}
                   onChange={handleNfcIdChange}
-                  placeholder="Tap NFC ID"
+                  placeholder={
+                    isStudentIdMode ? "Enter Student ID" : "Tap NFC ID"
+                  }
                   className=" w-[80%] h-24 border rounded-xl p-3 outline-none text-center"
                 />
+                <button
+                  className="w-[50%] text-white rounded-xl p-4"
+                  onClick={handleModeSwitch}
+                >
+                  {isStudentIdMode
+                    ? "Switch to NFC ID"
+                    : "Switch to Student ID"}
+                </button>
                 {nfcError && <p className=" text-[#f00] mt-2">{nfcError}</p>}
                 <button
                   onClick={() => setnfcModal(false)}
@@ -237,6 +261,14 @@ export default function HomePage() {
               className="bg-[#002147] w-full p-4 text-white rounded-xl mt-4"
             >
               Products
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("./login")}
+              className=" bg-red-400 w-full p-4 text-white rounded-xl mt-4"
+            >
+              Logout
             </button>
 
             {productModal && (
