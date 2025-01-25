@@ -1,12 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
+import { Field, Form, Formik } from "formik";
+import * as Yup from "yup";
 import Head from "next/head";
 
+const validationSchema = Yup.object({
+  canteenId: Yup.number().required("Canteen ID is required").integer(),
+  password: Yup.string().required("Password is required"),
+});
+
 export default function Login() {
-  console.log("HI FROM LOGIN FOLDER");
   const router = useRouter();
+
+  const handleSubmit = (values) => {
+    console.log("Form Submitted", values);
+
+    router.push("./home");
+  };
 
   return (
     <div className="h-screen w-screen bg-[url('/images/bg.svg')] bg-cover">
@@ -20,29 +31,61 @@ export default function Login() {
             height={0}
             className=" max-h-[80px] w-auto"
           />
-          <input
-            type="number"
-            placeholder="Canteen ID"
-            className=" outline-none rounded-xl p-2 w-[50%]"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className=" outline-none rounded-xl p-2 w-[50%]"
-          />
-          <button
-            type="button"
-            onClick={() => router.push("./home")}
-            className=" bg-[#002147] text-white rounded-xl p-2 w-[20%]"
+
+          <Formik
+            initialValues={{ canteenId: "", password: "" }}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
           >
-            Log in
-          </button>
+            {({ errors, touched }) => (
+              <Form className="w-full flex flex-col items-center gap-y-4">
+                <div className="w-[50%]">
+                  <Field
+                    type="number"
+                    name="canteenId"
+                    placeholder="Canteen ID"
+                    className={`outline-none rounded-xl p-2 w-full ${
+                      errors.canteenId && touched.canteenId
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                  {errors.canteenId && touched.canteenId && (
+                    <div className="text-red-500 text-sm">
+                      {String(errors.canteenId)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-[50%]">
+                  <Field
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    className={`outline-none rounded-xl p-2 w-full ${
+                      errors.password && touched.password
+                        ? "border-red-500"
+                        : ""
+                    }`}
+                  />
+                  {errors.password && touched.password && (
+                    <div className="text-red-500 text-sm">
+                      {String(errors.password)}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="bg-[#002147] text-white rounded-xl p-2 w-[20%] mt-4"
+                >
+                  Log in
+                </button>
+              </Form>
+            )}
+          </Formik>
         </div>
       </div>
-
-      {/* <button type="button" onClick={() => router.push("./home")}>
-        Dashboard
-      </button> */}
     </div>
   );
 }
