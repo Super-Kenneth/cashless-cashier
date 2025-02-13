@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -99,9 +100,45 @@ export default function HomePage() {
     ]);
   };
 
-  const handleNfcIdChange = (e) => {
+  const handleSubmit = async () => {
+    const store = 1;
+    const staff = 6;
+    const store_role = "merchant";
+    const user_id = nfcId;
+    const amount = total;
+
+    try {
+      const response = await axios.post("http://localhost:5500/cashier", {
+        store,
+        staff,
+        store_role,
+        user_id,
+        amount,
+      });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+    closeModal();
+    console.log("total: ", total);
+    console.log("nfc id: ", nfcId);
+    location.reload();
+  };
+
+  const handleNfcIdChange = async (e) => {
     const enteredId = e.target.value;
+
     setNfcId(enteredId);
+    console.log(enteredId);
+
+    try {
+      const res = await axios.get(
+        `http://localhost:5500/students/nfc/${enteredId}`
+      );
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
 
     const foundUser = user.find(
       (user) =>
@@ -128,6 +165,8 @@ export default function HomePage() {
       setShowModal(false);
     }
   };
+
+  // console.log(handleNfcIdChange);
 
   const handleModeSwitch = () => {
     setIsStudentIdMode((prevMode) => {
@@ -186,7 +225,7 @@ export default function HomePage() {
               </button>
               <button
                 onClick={clearTotal}
-                className=" bg-[#f00] w-[20%] p-3 rounded-xl text-white flex justify-center items-center"
+                className=" bg-[#f00] w-[20%] text-sm rounded-xl text-white flex justify-center items-center"
               >
                 Clear Total
               </button>
@@ -234,13 +273,13 @@ export default function HomePage() {
                 type="number"
                 value={amount}
                 onChange={handleInputChange}
-                className="p-3 w-full border border-[#002147] rounded-lg outline-none"
+                className="p-2 text-sm w-full border border-[#002147] rounded-lg outline-none"
                 placeholder="Enter a custom amount"
               />
             </div>
             <button
               onClick={handleInputSubmit}
-              className="w-full mt-4 bg-[#002147] p-3 rounded-xl text-white"
+              className="w-full mt-4 bg-[#002147] p-2 rounded-xl text-white"
             >
               Add Amount
             </button>
@@ -258,7 +297,7 @@ export default function HomePage() {
 
             <button
               onClick={() => setProductModal(true)}
-              className="bg-[#002147] w-full p-4 text-white rounded-xl mt-4"
+              className="bg-[#002147] w-full p-4 text-white rounded-xl mt-4 text-sm"
             >
               Products
             </button>
@@ -266,7 +305,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => router.push("./login")}
-              className=" bg-red-400 w-full p-4 text-white rounded-xl mt-4"
+              className=" bg-red-400 w-full p-3 text-white rounded-xl mt-4"
             >
               Logout
             </button>
@@ -325,7 +364,7 @@ export default function HomePage() {
               </div>
             ) : (
               <div className=" w-full h-full">
-                <div className=" w-full h-[80%] flex flex-col justify-center items-center text-[#002147]">
+                <div className=" w-full h-[70%] flex flex-col justify-center items-center text-[#002147]">
                   <p className=" text-3xl font-semibold capitalize ">
                     {userInfo.lname}, {userInfo.fname} {userInfo.mname}
                   </p>
@@ -343,11 +382,9 @@ export default function HomePage() {
                     Amount to pay: ₱{total}
                   </p>
                 </div>
-                <div className=" w-full h-[20%] flex flex-col items-center gap-y-2">
+                <div className=" w-full h-[30%] flex flex-col items-center gap-y-1 ">
                   <button
-                    onClick={() => {
-                      window.location.reload();
-                    }}
+                    onClick={handleSubmit}
                     className=" w-[60%] h-[50%] bg-[#002147] flex justify-center items-center py-8 rounded-xl text-white"
                   >
                     Confirm
