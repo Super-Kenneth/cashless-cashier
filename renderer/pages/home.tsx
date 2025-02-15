@@ -152,6 +152,7 @@ export default function HomePage() {
     } else if (foundUser) {
       setNfcError("");
       setUserInfo(foundUser);
+      setnfcModal(false); // Close the NFC modal if user is found
 
       if (foundUser.current_balance < total) {
         setModalMessage("Insufficient Balance");
