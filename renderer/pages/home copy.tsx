@@ -14,7 +14,7 @@ export default function HomePage() {
   const [nfcModal, setnfcModal] = useState(false);
   const [productModal, setProductModal] = useState(false);
   const [isStudentIdMode, setIsStudentIdMode] = useState(false);
-  const [fetchUser, setFetchUser] = useState([]);
+  const [studInfo, setStudInfo] = useState([]);
 
   const nfcInputRef = useRef(null);
 
@@ -134,15 +134,15 @@ export default function HomePage() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5500/users/cards/${enteredId}`
+        `http://localhost:5500/students/nfc/${enteredId}`
       );
       console.log(res.data);
-      setFetchUser([res.data.data]);
+      setStudInfo(res.data);
     } catch (error) {
       console.log(error);
     }
 
-    const foundUser = user.find(
+    const foundUser = studInfo.find(
       (user) =>
         (isStudentIdMode && user.student_id === enteredId) ||
         (!isStudentIdMode && user.nfc_id === enteredId)
@@ -154,7 +154,6 @@ export default function HomePage() {
     } else if (foundUser) {
       setNfcError("");
       setUserInfo(foundUser);
-      setnfcModal(false); // Close the NFC modal if user is found
 
       if (foundUser.current_balance < total) {
         setModalMessage("Insufficient Balance");
@@ -263,15 +262,6 @@ export default function HomePage() {
                 >
                   X
                 </button>
-                <div className="w-[50%] h-[20%] flex justify-center items-center bg-white">
-                  {fetchUser.map((user) => (
-                    <div key={user.id}>
-                      <h1>USER ID: {user.username}</h1>
-                      <h1>FULL NAME: {user.full_name}</h1>
-                      <h1>BALANCE: {user.total_amount}</h1>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           )}
