@@ -3,18 +3,20 @@ import axios from "axios";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { log } from "console";
 
 export default function HomePage() {
   const [state, setState] = useState({
     orders: [],
     nfcId: "",
+    reference_no: "",
     userDetails: null,
     errorMessage: "",
     modalOpen: false,
     productModalOpen: false,
     accModalOpen: false,
     paymentSuccess: false,
-    countdown: 5,
+    countdown: 3,
   });
 
   const nfcInputRef = useRef(null);
@@ -23,6 +25,7 @@ export default function HomePage() {
 
   const handleNfcIdChange = async (e) => {
     const enteredId = e.target.value;
+
     setState((prev) => ({ ...prev, nfcId: enteredId, errorMessage: "" }));
 
     if (debounceTimeout.current) {
@@ -30,9 +33,12 @@ export default function HomePage() {
     }
 
     debounceTimeout.current = setTimeout(async () => {
+      // console.log(typeof enteredId);
+
       try {
         const res = await axios.get(
-          `https://attendance-backend-app.up.railway.app/users/cards/${enteredId}`
+          `http://localhost:5500/users/cards/${enteredId}`
+          // `https://attendance-backend-app.up.railway.app/users/cards/${enteredId}`
         );
         if (res.data && res.data.data) {
           setState((prev) => ({ ...prev, userDetails: res.data.data }));
@@ -88,19 +94,58 @@ export default function HomePage() {
     0
   );
 
-  const handleConfirmPayment = () => {
-    setState((prevState) => ({ ...prevState, paymentSuccess: true }));
+  const handleConfirmPayment = async () => {
+    console.log(state.nfcId);
+    console.log(totalAmount);
+    const receiver_id = "0009057977";
+
+    try {
+      const response = await axios.post("http://localhost:5500/cashier", {
+        amount: totalAmount,
+        sender_id: state.nfcId,
+        receiver_id,
+      });
+
+      try {
+        await axios.post("http://localhost:7000/receipts", {
+          amount: totalAmount,
+          store_name: "CMI Canteen",
+          ref_no: response.data.cashier.reference_no,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+
+      setState((prevState) => ({
+        ...prevState,
+        reference_no: response.data.cashier.reference_no,
+        paymentSuccess: true,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+
+    // console.log("SUCCESS PAYMENT WHEN PRESS");
 
     const timer = setInterval(() => {
       setState((prevState) => {
         const countdown = prevState.countdown;
         if (countdown <= 1) {
           clearInterval(timer);
-          window.location.reload();
+          // window.location.reload();
         }
-        return { ...prevState, countdown: countdown - 1 };
+
+        return {
+          ...prevState,
+          countdown: countdown - 1,
+          userDetails: null,
+          nfcId: "",
+          modalOpen: false,
+          paymentSuccess: false,
+          orders: [],
+        };
       });
-    }, 1000);
+    }, 3000);
   };
 
   const product = [
@@ -135,7 +180,7 @@ export default function HomePage() {
     month: "short",
     day: "numeric",
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
   });
 
   return (
@@ -202,7 +247,7 @@ export default function HomePage() {
                       ...prevState,
                       paymentSuccess: false,
                     }));
-                    window.location.reload();
+                    // window.location.reload();
                   }}
                 />
 
@@ -273,7 +318,7 @@ export default function HomePage() {
                     </p>
                     <div className=" border-b-2 mt-2 border-[#002147] border-dashed w-full" />
                     <div className="text-left text-[1.2vw] text-gray-500 mt-2">
-                      <p>Receipt No: 12345</p>
+                      <p>Receipt No: {state.reference_no}</p>
                       <p>Date & Time: {date}</p>
                       <p>Name: {state.userDetails.full_name}</p>
                       <p className=" mt-2">Total Amount: ₱{totalAmount}</p>
