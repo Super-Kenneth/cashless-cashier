@@ -37,8 +37,8 @@ export default function HomePage() {
 
       try {
         const res = await axios.get(
-          `http://localhost:5500/users/cards/${enteredId}`
-          // `https://attendance-backend-app.up.railway.app/users/cards/${enteredId}`
+          // `http://localhost:5500/users/cards/${enteredId}`
+          `https://attendance-backend-app.up.railway.app/users/cards/${enteredId}`
         );
         if (res.data && res.data.data) {
           setState((prev) => ({ ...prev, userDetails: res.data.data }));
@@ -100,14 +100,21 @@ export default function HomePage() {
     const receiver_id = "0009057977";
 
     try {
-      const response = await axios.post("http://localhost:5500/cashier", {
-        amount: totalAmount,
-        sender_id: state.nfcId,
-        receiver_id,
-      });
+      // const response = await axios.post("http://localhost:5500/cashier", {
+      const response = await axios.post(
+        "https://attendance-backend-app.up.railway.app/cashier",
+        {
+          amount: totalAmount,
+          sender_id: state.nfcId,
+          receiver_id,
+        }
+      );
 
       try {
         await axios.post("http://localhost:7000/receipts", {
+          // await axios.post(
+          //   "https://attendance-backend-app.up.railway.app/receipts",
+          //   {
           amount: totalAmount,
           store_name: "CMI Canteen",
           ref_no: response.data.cashier.reference_no,
