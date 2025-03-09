@@ -109,6 +109,7 @@ export default function HomePage() {
           receiver_id,
         }
       );
+      console.log(response.data.cashier);
 
       try {
         await axios.post("http://localhost:7000/receipts", {
@@ -121,6 +122,7 @@ export default function HomePage() {
         });
       } catch (error) {
         console.log(error);
+        console.log("ERROR: Receipt printer not found.");
       }
 
       setState((prevState) => ({
@@ -153,6 +155,18 @@ export default function HomePage() {
         };
       });
     }, 3000);
+  };
+
+  const testPrint = async () => {
+    try {
+      await axios.post("http://localhost:7000/receipts/test", {
+        amount: 10000,
+        store_name: "CMI Canteen",
+      });
+    } catch (error) {
+      console.log(error);
+      console.log("ERROR: Receipt printer not found.");
+    }
   };
 
   const product = [
@@ -444,6 +458,14 @@ export default function HomePage() {
               className="w-full p-3 bg-[#002147] text-white rounded-xl mt-4 text-[1.5vw]"
             >
               Products
+            </button>
+          </div>
+          <div className=" px-4">
+            <button
+              onClick={testPrint}
+              className="w-full p-3 bg-[#002147] text-white rounded-xl mt-4 text-[1.5vw]"
+            >
+              Test Print
             </button>
           </div>
         </div>
