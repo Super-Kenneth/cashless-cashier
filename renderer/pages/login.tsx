@@ -1,22 +1,60 @@
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router"; // Changed import to next/router
 import Image from "next/image";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
+import axios from "axios"; // Import axios
 import Head from "next/head";
+import Cookies from "js-cookie"; // Import js-cookie
 
 const validationSchema = Yup.object({
-  canteenId: Yup.number().required("Canteen ID is required").integer(),
+  canteenId: Yup.mixed().required("Canteen ID is required"),
   password: Yup.string().required("Password is required"),
 });
 
 export default function Login() {
   const router = useRouter();
 
-  const handleSubmit = (values) => {
-    console.log("Form Submitted", values);
+  const handleSubmit = async (values) => {
+    try {
 
-    router.push("./home");
+      const response = await axios.post(
+        "https://attendance-backend-app.up.railway.app/login/cashier_log",
+        {
+          username: values.canteenId,
+          password: values.password,
+        }
+      );
+
+      console.log("API Response:", response.data);
+
+      if (response.data.success) {
+        console.log("Authentication successful, setting cookie...");
+
+        // Save token or any relevant data to cookies
+        Cookies.set("authToken", response.data.token, { expires: 1 }); // 1 day expiration
+
+        // If login is successful, redirect to the home page
+        console.log("Redirecting to home...");
+        router.push("/home"); // Or try window.location.href = "/home";
+      } else {
+        // Handle login failure (e.g., show an error message)
+        console.log("Login failed:", response.data.message);
+
+        // Assuming the API sends a message when the password is incorrect
+        if (
+          response.data.message &&
+          response.data.message.toLowerCase().includes("password")
+        ) {
+          alert("Incorrect password. Please try again.");
+        } else {
+          alert("Login failed: " + response.data.message);
+        }
+      }
+    } catch (error) {
+      console.error("Error during API call:", error);
+      alert("Invalid Account. Please try again.");
+    }
   };
 
   return (
@@ -41,7 +79,7 @@ export default function Login() {
               <Form className="w-full flex flex-col items-center gap-y-4">
                 <div className="w-[50%]">
                   <Field
-                    type="number"
+                    type="text"
                     name="canteenId"
                     placeholder="Canteen ID"
                     className={`outline-none rounded-xl p-2 w-full ${
@@ -59,9 +97,10 @@ export default function Login() {
 
                 <div className="w-[50%]">
                   <Field
-                    type="password"
-                    name="password"
+                    type="password" // Change the type to password
+                    name="password" // Make sure the name is "password" here
                     placeholder="Password"
+                    autoComplete="off" // Disable autofill
                     className={`outline-none rounded-xl p-2 w-full ${
                       errors.password && touched.password
                         ? "border-red-500"
