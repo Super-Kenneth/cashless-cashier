@@ -118,15 +118,16 @@ export default function HomePage() {
       );
 
       try {
-        await axios.post(
-          "https://attendance-backend-app.up.railway.app/receipts",
-          {
-            amount: totalAmount,
-            store_name: "CMI Canteen",
-            ref_no: response.data.cashier.reference_no,
-            full_name: full_name,
-          }
-        );
+
+        await axios.post("http://localhost:7890/printer/receipts", {
+          // await axios.post(
+          //   "https://attendance-backend-app.up.railway.app/receipts",
+          //   {
+          amount: totalAmount,
+          store_name: "CMI Canteen",
+          ref_no: response.data.cashier.reference_no,
+          full_name: full_name
+        });
       } catch (error) {
         console.log("ERROR: Receipt printer not found.");
       }
@@ -167,7 +168,7 @@ export default function HomePage() {
 
   const testPrint = async () => {
     try {
-      await axios.post("http://localhost:7890/receipts/test", {
+      await axios.post("http://localhost:7890/printer/test", {
         amount: 10000,
         store_name: "CMI Canteen",
         full_name: full_name,
