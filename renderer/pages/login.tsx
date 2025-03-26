@@ -17,31 +17,28 @@ export default function Login() {
 
   const handleSubmit = async (values) => {
     try {
-
       const response = await axios.post(
-        "https://attendance-backend-app.up.railway.app/login/cashier_log",
+        "http://localhost:5500/login/cashier_log",
         {
           username: values.canteenId,
           password: values.password,
         }
       );
 
-      console.log("API Response:", response.data);
+      console.log("API Response:", response.data.data.full_name);
 
       if (response.data.success) {
         console.log("Authentication successful, setting cookie...");
 
-        // Save token or any relevant data to cookies
-        Cookies.set("authToken", response.data.token, { expires: 1 }); // 1 day expiration
+        console.log(response.data.token);
 
-        // If login is successful, redirect to the home page
-        console.log("Redirecting to home...");
-        router.push("/home"); // Or try window.location.href = "/home";
+        Cookies.set("authToken", response.data.token, { expires: 1 });
+        Cookies.set("fullName", response.data.data.full_name);
+
+        router.push("/home");
       } else {
-        // Handle login failure (e.g., show an error message)
         console.log("Login failed:", response.data.message);
 
-        // Assuming the API sends a message when the password is incorrect
         if (
           response.data.message &&
           response.data.message.toLowerCase().includes("password")
