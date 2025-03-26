@@ -3,7 +3,8 @@ import axios from "axios";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { log } from "console";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 export default function HomePage() {
   const [state, setState] = useState({
@@ -23,6 +24,13 @@ export default function HomePage() {
   const debounceTimeout = useRef(null);
   const router = useRouter();
 
+  const token = Cookies.get("authToken");
+  const full_name = Cookies.get("fullName");
+  console.log(full_name);
+
+  // const subs = jwtDecode(token);
+  // console.log("token", subs);
+
   const handleNfcIdChange = async (e) => {
     const enteredId = e.target.value;
 
@@ -37,8 +45,12 @@ export default function HomePage() {
 
       try {
         const res = await axios.get(
-          // `http://localhost:5500/users/cards/${enteredId}`
-          `https://attendance-backend-app.up.railway.app/users/cards/${enteredId}`
+          `http://localhost:5500/users/cards/${enteredId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (res.data && res.data.data) {
           setState((prev) => ({ ...prev, userDetails: res.data.data }));
@@ -97,28 +109,37 @@ export default function HomePage() {
   const handleConfirmPayment = async () => {
     console.log(state.nfcId);
     console.log(totalAmount);
-    const receiver_id = "0009057977";
+    const token = Cookies.get("authToken");
+    const full_name = Cookies.get("fullName");
+    const sub = jwtDecode(token);
 
     try {
-      // const response = await axios.post("http://localhost:5500/cashier", {
       const response = await axios.post(
-        "https://attendance-backend-app.up.railway.app/cashier",
+        "http://localhost:5500/cashier",
+        // const response = await axios.post(
+        //   "https://attendance-backend-app.up.railway.app/cashier",
         {
           amount: totalAmount,
           sender_id: state.nfcId,
-          receiver_id,
+          receiver_id: sub.nfc_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       console.log(response.data.cashier);
 
       try {
-        await axios.post("http://localhost:7000/receipts", {
+        await axios.post("http://localhost:7890/receipts", {
           // await axios.post(
           //   "https://attendance-backend-app.up.railway.app/receipts",
           //   {
           amount: totalAmount,
           store_name: "CMI Canteen",
           ref_no: response.data.cashier.reference_no,
+          full_name: full_name
         });
       } catch (error) {
         console.log(error);
@@ -134,7 +155,7 @@ export default function HomePage() {
       console.log(error);
     }
 
-    // console.log("SUCCESS PAYMENT WHEN PRESS");
+    console.log("SUCCESS PAYMENT WHEN PRESS");
 
     const timer = setInterval(() => {
       setState((prevState) => {
@@ -159,9 +180,10 @@ export default function HomePage() {
 
   const testPrint = async () => {
     try {
-      await axios.post("http://localhost:7000/receipts/test", {
+      await axios.post("http://localhost:7890/receipts/test", {
         amount: 10000,
         store_name: "CMI Canteen",
+        full_name: full_name,
       });
     } catch (error) {
       console.log(error);
@@ -202,6 +224,12 @@ export default function HomePage() {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const handleLogout = () => {
+    Cookies.remove("authToken");
+    Cookies.remove("fullName");
+    router.push("/login");
+  };
 
   return (
     <>
@@ -274,7 +302,7 @@ export default function HomePage() {
                 {!state.userDetails && !state.paymentSuccess && (
                   <input
                     ref={nfcInputRef}
-                    type="text"
+                    type="password"
                     placeholder="Tap NFC ID"
                     value={state.nfcId}
                     onChange={handleNfcIdChange}
@@ -406,7 +434,7 @@ export default function HomePage() {
                 <div className=" px-2 pb-2">
                   <p className=" text-white text-[1.5vw]">Joedel's Canteen</p>
                   <button
-                    onClick={() => router.push("./login")}
+                    onClick={handleLogout}
                     className=" text-white w-full rounded p-1 flex flex-row gap-2 items-center text-[1.5vw] hover:bg-gray-500"
                   >
                     Log out
