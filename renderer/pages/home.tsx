@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import axiosInstance from "../../library/axios"
 
 export default function HomePage() {
   const [state, setState] = useState({
@@ -44,8 +45,8 @@ export default function HomePage() {
       // console.log(typeof enteredId);
 
       try {
-        const res = await axios.get(
-          `http://localhost:5500/users/cards/${enteredId}`,
+        const res = await axiosInstance.get(
+          `/users/cards/${enteredId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -114,8 +115,8 @@ export default function HomePage() {
     const sub = jwtDecode(token);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5500/cashier",
+      const response = await axiosInstance.post(
+        "/cashier",
         // const response = await axios.post(
         //   "https://attendance-backend-app.up.railway.app/cashier",
         {

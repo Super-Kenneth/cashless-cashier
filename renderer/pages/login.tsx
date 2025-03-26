@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import axios from "axios"; // Import axios
 import Head from "next/head";
 import Cookies from "js-cookie"; // Import js-cookie
+import axiosInstance from "../../library/axios";
 
 const validationSchema = Yup.object({
   canteenId: Yup.mixed().required("Canteen ID is required"),
@@ -17,13 +18,10 @@ export default function Login() {
 
   const handleSubmit = async (values) => {
     try {
-      const response = await axios.post(
-        "http://localhost:5500/login/cashier_log",
-        {
-          username: values.canteenId,
-          password: values.password,
-        }
-      );
+      const response = await axiosInstance.post("/login/cashier_log", {
+        username: values.canteenId,
+        password: values.password,
+      });
 
       console.log("API Response:", response.data.data.full_name);
 
