@@ -198,7 +198,6 @@ export default function HomePage() {
     { product: "Water (small)", price: 15 },
     { product: "Water (big)", price: 25 },
     { product: "Softdrinks mismo", price: 25 },
-    { product: "Shabu", price: 150 },
   ];
 
   const handleProductSelect = (item) => {
@@ -457,8 +456,18 @@ export default function HomePage() {
               type="number"
               name="amount"
               placeholder="Enter Amount"
+              min="0"
+              step="0.01"
+              onChange={(e) => {
+                const value = Math.max(0, parseFloat(e.target.value));
+                setState((prev) => ({
+                  ...prev,
+                  amount: value,
+                }));
+              }}
               className="border border-[#002147] w-full h-8 md:h-12 rounded-xl p-4 text-[1.5vw] text-center text-[#002147] outline-none"
             />
+
             <button
               type="submit"
               className="w-full p-3 bg-[#002147] text-white rounded-xl mt-4 text-[1.5vw]"

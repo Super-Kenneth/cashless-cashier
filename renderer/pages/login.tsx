@@ -1,11 +1,11 @@
 import React from "react";
-import { useRouter } from "next/router"; // Changed import to next/router
+import { useRouter } from "next/router";
 import Image from "next/image";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
-import axios from "axios"; // Import axios
+import axios from "axios";
 import Head from "next/head";
-import Cookies from "js-cookie"; // Import js-cookie
+import Cookies from "js-cookie";
 
 const validationSchema = Yup.object({
   canteenId: Yup.mixed().required("Canteen ID is required"),
@@ -94,10 +94,10 @@ export default function Login() {
 
                 <div className="w-[50%]">
                   <Field
-                    type="password" // Change the type to password
-                    name="password" // Make sure the name is "password" here
+                    type="password"
+                    name="password"
                     placeholder="Password"
-                    autoComplete="off" // Disable autofill
+                    autoComplete="off"
                     className={`outline-none rounded-xl p-2 w-full ${
                       errors.password && touched.password
                         ? "border-red-500"
