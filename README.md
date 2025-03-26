@@ -1,38 +1,67 @@
-<p align="center"><img src="https://i.imgur.com/a9QWW0v.png"></p>
+# ESCPOS in Node.js Error Handling
 
-## Usage
+## Error: Cannot find module 'escpos-usb'
 
-### Create an App
+If you encounter this error
 
-```
-# with npx
-$ npx create-nextron-app my-app --example with-tailwindcss
-
-# with yarn
-$ yarn create nextron-app my-app --example with-tailwindcss
-
-# with pnpm
-$ pnpm dlx create-nextron-app my-app --example with-tailwindcss
+```bash
+Error: Cannot find module 'escpos-usb'
 ```
 
-### Install Dependencies
+you can reinstall the `escpos-usb`
 
-```
-$ cd my-app
+Uninstall
 
-# using yarn or npm
-$ yarn (or `npm install`)
-
-# using pnpm
-$ pnpm install --shamefully-hoist
+```bash
+npm uninstall escpos escpos-usb usb
 ```
 
-### Use it
+Install again
 
+```bash
+npm install escpos escpos-usb usb
 ```
-# development mode
-$ yarn dev (or `npm run dev` or `pnpm run dev`)
 
-# production build
-$ yarn build (or `npm run build` or `pnpm run build`)
+try to run
+
+```bash
+node {your escpos file}.js
+```
+
+## Error 2
+
+If you encounter this type of error
+
+```bash
+ usb.on('detach', function(device){
+      ^
+
+TypeError: usb.on is not a function
+```
+
+Install this
+
+```bash
+npm install -S usb@1.8.0
+```
+
+try to run
+
+```bash
+node {your escpos file}.js
+```
+
+## Check the list
+
+```bash
+npm list escpos escpos-usb usb
+```
+
+it should look like this
+
+```bash
+├─┬ escpos-usb@3.0.0-alpha.4
+│ └── usb@1.8.0 deduped
+├── escpos@3.0.0-alpha.6
+└── usb@1.8.0
 ```

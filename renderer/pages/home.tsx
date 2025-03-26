@@ -133,7 +133,7 @@ export default function HomePage() {
       console.log(response.data.cashier);
 
       try {
-        await axios.post("http://localhost:7890/receipts", {
+        await axios.post("http://localhost:7890/printer/receipts", {
           // await axios.post(
           //   "https://attendance-backend-app.up.railway.app/receipts",
           //   {
@@ -181,7 +181,7 @@ export default function HomePage() {
 
   const testPrint = async () => {
     try {
-      await axios.post("http://localhost:7890/receipts/test", {
+      await axios.post("http://localhost:7890/printer/test", {
         amount: 10000,
         store_name: "CMI Canteen",
         full_name: full_name,
