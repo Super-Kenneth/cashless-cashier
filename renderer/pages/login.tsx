@@ -1,11 +1,11 @@
 import React from "react";
-import { useRouter } from "next/router"; // Changed import to next/router
+import { useRouter } from "next/router";
 import Image from "next/image";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
-import axios from "axios"; // Import axios
+import axios from "axios";
 import Head from "next/head";
-import Cookies from "js-cookie"; // Import js-cookie
+import Cookies from "js-cookie";
 
 const validationSchema = Yup.object({
   canteenId: Yup.mixed().required("Canteen ID is required"),
@@ -17,7 +17,6 @@ export default function Login() {
 
   const handleSubmit = async (values) => {
     try {
-
       const response = await axios.post(
         "https://attendance-backend-app.up.railway.app/login/cashier_log",
         {
@@ -31,17 +30,13 @@ export default function Login() {
       if (response.data.success) {
         console.log("Authentication successful, setting cookie...");
 
-        // Save token or any relevant data to cookies
-        Cookies.set("authToken", response.data.token, { expires: 1 }); // 1 day expiration
+        Cookies.set("authToken", response.data.token, { expires: 1 });
 
-        // If login is successful, redirect to the home page
         console.log("Redirecting to home...");
-        router.push("/home"); // Or try window.location.href = "/home";
+        router.push("/home");
       } else {
-        // Handle login failure (e.g., show an error message)
         console.log("Login failed:", response.data.message);
 
-        // Assuming the API sends a message when the password is incorrect
         if (
           response.data.message &&
           response.data.message.toLowerCase().includes("password")
@@ -97,10 +92,10 @@ export default function Login() {
 
                 <div className="w-[50%]">
                   <Field
-                    type="password" // Change the type to password
-                    name="password" // Make sure the name is "password" here
+                    type="password"
+                    name="password"
                     placeholder="Password"
-                    autoComplete="off" // Disable autofill
+                    autoComplete="off"
                     className={`outline-none rounded-xl p-2 w-full ${
                       errors.password && touched.password
                         ? "border-red-500"
