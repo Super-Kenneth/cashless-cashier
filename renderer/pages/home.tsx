@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import axiosInstance from "../../library/axios"
+import axiosInstance from "../../library/axios";
 
 export default function HomePage() {
   const [state, setState] = useState({
@@ -27,10 +27,6 @@ export default function HomePage() {
 
   const token = Cookies.get("authToken");
   const full_name = Cookies.get("fullName");
-  console.log(full_name);
-
-  // const subs = jwtDecode(token);
-  // console.log("token", subs);
 
   const handleNfcIdChange = async (e) => {
     const enteredId = e.target.value;
@@ -42,17 +38,12 @@ export default function HomePage() {
     }
 
     debounceTimeout.current = setTimeout(async () => {
-      // console.log(typeof enteredId);
-
       try {
-        const res = await axiosInstance.get(
-          `/users/cards/${enteredId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axiosInstance.get(`/users/cards/${enteredId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (res.data && res.data.data) {
           setState((prev) => ({ ...prev, userDetails: res.data.data }));
         } else {
@@ -108,17 +99,12 @@ export default function HomePage() {
   );
 
   const handleConfirmPayment = async () => {
-    console.log(state.nfcId);
-    console.log(totalAmount);
     const token = Cookies.get("authToken");
-    const full_name = Cookies.get("fullName");
     const sub = jwtDecode(token);
 
     try {
       const response = await axiosInstance.post(
         "/cashier",
-        // const response = await axios.post(
-        //   "https://attendance-backend-app.up.railway.app/cashier",
         {
           amount: totalAmount,
           sender_id: state.nfcId,
@@ -130,20 +116,18 @@ export default function HomePage() {
           },
         }
       );
-      console.log(response.data.cashier);
 
       try {
-        await axios.post("http://localhost:7890/receipts", {
-          // await axios.post(
-          //   "https://attendance-backend-app.up.railway.app/receipts",
-          //   {
-          amount: totalAmount,
-          store_name: "CMI Canteen",
-          ref_no: response.data.cashier.reference_no,
-          full_name: full_name
-        });
+        await axios.post(
+          "https://attendance-backend-app.up.railway.app/receipts",
+          {
+            amount: totalAmount,
+            store_name: "CMI Canteen",
+            ref_no: response.data.cashier.reference_no,
+            full_name: full_name,
+          }
+        );
       } catch (error) {
-        console.log(error);
         console.log("ERROR: Receipt printer not found.");
       }
 
@@ -151,32 +135,34 @@ export default function HomePage() {
         ...prevState,
         reference_no: response.data.cashier.reference_no,
         paymentSuccess: true,
+        countdown: 3, // Reset countdown here
       }));
+
+      const timer = setInterval(() => {
+        setState((prevState) => {
+          const newCountdown = prevState.countdown - 1;
+          if (newCountdown <= 0) {
+            clearInterval(timer);
+            return {
+              ...prevState,
+              countdown: 0,
+              userDetails: null,
+              nfcId: "",
+              modalOpen: false,
+              paymentSuccess: false,
+              orders: [],
+            };
+          }
+
+          return {
+            ...prevState,
+            countdown: newCountdown,
+          };
+        });
+      }, 1000);
     } catch (error) {
       console.log(error);
     }
-
-    console.log("SUCCESS PAYMENT WHEN PRESS");
-
-    const timer = setInterval(() => {
-      setState((prevState) => {
-        const countdown = prevState.countdown;
-        if (countdown <= 1) {
-          clearInterval(timer);
-          // window.location.reload();
-        }
-
-        return {
-          ...prevState,
-          countdown: countdown - 1,
-          userDetails: null,
-          nfcId: "",
-          modalOpen: false,
-          paymentSuccess: false,
-          orders: [],
-        };
-      });
-    }, 3000);
   };
 
   const testPrint = async () => {
@@ -187,7 +173,6 @@ export default function HomePage() {
         full_name: full_name,
       });
     } catch (error) {
-      console.log(error);
       console.log("ERROR: Receipt printer not found.");
     }
   };
@@ -296,7 +281,7 @@ export default function HomePage() {
                       ...prevState,
                       paymentSuccess: false,
                     }));
-                    // window.location.reload();
+                    window.location.reload();
                   }}
                 />
 
